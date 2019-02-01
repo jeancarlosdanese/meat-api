@@ -1,43 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const restify = require("restify");
-const server = restify.createServer({
-    name: 'meat-api',
-    version: '1.0.0'
-});
-server.use(restify.plugins.queryParser());
-server.get('/', [
-    (req, resp, next) => {
-        if (req.userAgent() && req.userAgent().includes('MSIE 7.0')) {
-            // resp.status(400)
-            // resp.json({ message: 'Please, update your browser' })
-            let error = new Error();
-            error.statusCode = 400;
-            error.message = 'Please, update your browser';
-            return next(error);
-        }
-        return next();
-    },
-    (req, resp, next) => {
-        // resp.contentType = 'application/json'
-        // resp.setHeader('Content-Type', 'application/json')
-        // resp.status(400)
-        // resp.send({message: 'hello'})
-        resp.json({ message: 'hello' });
-        return next();
-    }
-]);
-server.get('/info', (req, resp, next) => {
-    resp.json({
-        browser: req.userAgent(),
-        method: req.method,
-        url: req.href(),
-        path: req.path(),
-        query: req.query
-    });
-    return next();
-});
-server.listen(3000, () => {
-    console.log('API is running on http://localhost:3000');
+const server_1 = require("./server/server");
+const users_router_1 = require("./users/users.router");
+const server = new server_1.Server();
+server.bootstrap([users_router_1.userRouter]).then(server => {
+    console.log('API is running on: ', `http://${server.application.address().address}:${server.application.address().port}`);
+}).catch(error => {
+    console.log('Server failed to start');
+    console.log(error);
+    process.exit(1);
 });
 //# sourceMappingURL=main.js.map
