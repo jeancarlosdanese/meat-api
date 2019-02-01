@@ -1,12 +1,21 @@
 import * as restify from 'restify'
 import {environment} from '../common/environment'
 import {Router} from '../common/router'
+import * as mongoose from 'mongoose'
+import {mergePatchBodyParser} from './merge-patch.parser'
 
 export class Server {
 
   application: restify.Server
 
-  initRoutes(routers): Promise<any> {
+  initializeDb() {
+    return mongoose.connect(environment.db.url, {
+      useNewUrlParser: true, 
+      useCreateIndex: true
+    })
+  }
+
+  initRouters(routers): Promise<any> {
     return new Promise((resolv, reject) => {
       try {
         this.application = restify.createServer({
@@ -15,6 +24,8 @@ export class Server {
         })
         
         this.application.use(restify.plugins.queryParser())
+        this.application.use(restify.plugins.bodyParser())
+        this.application.use(mergePatchBodyParser)
 
         // routes
         for (const router of routers) {
@@ -32,7 +43,9 @@ export class Server {
   }
 
   bootstrap(routers: Router[] = []): Promise<Server> {
-    return this.initRoutes(routers).then(() => this)
+    return this.initializeDb().
+      then(() => 
+        this.initRouters(routers).then(() => this))
   }
   
 }
