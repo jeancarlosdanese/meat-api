@@ -9,28 +9,18 @@ class UserRouter extends Router {
 
     application.get('/users', (req, resp, next) => {
       User.find()
-        .then(users => {
-          resp.json(users)
-          return next()
-        })
+        .then(this.render(resp,next))
     })
 
     application.get('/users/:id', (req, resp, next) => {
       User.findById(req.params.id)
-        .then(user => {
-          resp.json(user)
-          return next()
-        })
+        .then(this.render(resp,next))
     })
 
     application.post('/users', (req, resp, next) => {
       const user = new User(req.body)
       user.save()
-        .then(user => {
-          user.password = undefined
-          resp.json(user)
-          return next()
-        })
+        .then(this.render(resp,next))
     })
 
     application.put('/users/:id', (req, resp, next) => {
@@ -46,10 +36,7 @@ class UserRouter extends Router {
             resp.send({message: 'Resource not found'})
           }
         })
-        .then(user => {
-          resp.json(user)
-          return next()
-        })
+        .then(this.render(resp,next))
     })
 
     application.patch('/users/:id', (req, resp, next) => {
@@ -57,15 +44,7 @@ class UserRouter extends Router {
       const options = { new: true }
 
       User.findByIdAndUpdate(req.params.id, req.body, options)
-        .then(user => {
-          if(user) {
-            resp.json(user)
-          } else {
-            resp.status(404)
-            resp.send({message: 'Resource not found'})
-          }
-          return next()
-        })
+        .then(this.render(resp,next))
     })
 
     application.del('/users/:id', (req, resp, next) => {
