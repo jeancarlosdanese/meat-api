@@ -1,59 +1,45 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const router_1 = require("../common/router");
+const restify = require("restify");
+const model_router_1 = require("../common/model-router");
 const users_model_1 = require("./users.model");
-const restify_errors_1 = require("restify-errors");
-class UserRouter extends router_1.Router {
-    applyRouters(application) {
-        application.get('/users', (req, resp, next) => {
-            users_model_1.User.find()
-                .then(this.render(resp, next));
-        });
-        application.get('/users/:id', (req, resp, next) => {
-            users_model_1.User.findById(req.params.id)
-                .then(this.render(resp, next));
-        });
-        application.post('/users', (req, resp, next) => {
-            const user = new users_model_1.User(req.body);
-            user.save()
-                .then(this.render(resp, next));
-        });
-        application.put('/users/:id', (req, resp, next) => {
-            const options = { overwrite: true };
-            users_model_1.User.update({ _id: req.params.id }, req.body, options)
-                .exec()
-                .then(result => {
-                if (result.n) {
-                    return users_model_1.User.findById(req.params.id);
-                }
-                else {
-                    resp.status(404);
-                    resp.send({ message: 'Resource not found' });
-                }
-            })
-                .then(this.render(resp, next));
-        });
-        application.patch('/users/:id', (req, resp, next) => {
-            const options = { new: true };
-            users_model_1.User.findByIdAndUpdate(req.params.id, req.body, options)
-                .then(this.render(resp, next));
-        });
-        application.del('/users/:id', (req, resp, next) => {
-            users_model_1.User.deleteOne({ _id: req.params.id })
-                .exec()
-                .then(result => {
-                if (result) {
-                    console.log(result);
-                    resp.send(204);
-                }
-                else {
-                    throw new restify_errors_1.NotFoundError('Documento não encontrado');
-                }
-                return next();
-            })
-                .catch(next);
+class UserRouter extends model_router_1.ModelRouter {
+    constructor() {
+        super(users_model_1.User);
+        this.findByEmail = (req, resp, next) => {
+            if (req.query.email) {
+                users_model_1.User.find({ email: req.query.email })
+                    .then(this.renderAll(resp, next))
+                    .catch(next);
+            }
+            else {
+                next();
+            }
+        };
+        this.on('beforeRender', document => {
+            // delete document.password
+            document.password = undefined;
         });
     }
+    applyRouters(application) {
+        // application.get({path: '/users', version: '2.0.0'}, [this.findByEmail, this.findAll])
+        // application.get({path: '/users', version: '1.0.0'}, this.findAll)
+        application.get('/users', restify.plugins.conditionalHandler([
+            {
+                version: '1.0.0',
+                handler: this.findAll
+            },
+            {
+                version: '2.0.0',
+                handler: [this.findByEmail, this.findAll]
+            }
+        ]));
+        application.get('/users/:id', [this.validateId, this.findById]);
+        application.post('/users', this.save);
+        application.put('/users/:id', [this.validateId, this.replace]);
+        application.patch('/users/:id', [this.validateId, this.update]);
+        application.del('/users/:id', [this.validateId, this.delete]);
+    }
 }
-exports.userRouter = new UserRouter();
+exports.usersRouter = new UserRouter();
 //# sourceMappingURL=users.router.js.map

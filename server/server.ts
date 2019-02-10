@@ -3,6 +3,7 @@ import {environment} from '../common/environment'
 import {Router} from '../common/router'
 import * as mongoose from 'mongoose'
 import {mergePatchBodyParser} from './merge-patch.parser'
+import {handleError} from './handle.error'
 
 export class Server {
 
@@ -20,9 +21,17 @@ export class Server {
       try {
         this.application = restify.createServer({
           name: 'meat-api',
-          version: '1.0.0'
+          versions: ['1.0.0', '2.0.0']
         })
         
+        /* this.application.use(restify.plugins.conditionalHandler({
+          contentType: 'application/json',
+          version: '1.0.0',
+          handler: (req, resp, next) => {
+            next()
+          }
+        })) */
+
         this.application.use(restify.plugins.queryParser())
         this.application.use(restify.plugins.bodyParser())
         this.application.use(mergePatchBodyParser)
@@ -35,6 +44,8 @@ export class Server {
         this.application.listen(environment.server.port, environment.server.host, () => {
           resolv(this.application)
         })
+
+        this.application.on('restifyError', handleError)
 
       } catch (error) {
         reject(error)

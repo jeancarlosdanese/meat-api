@@ -1,72 +1,50 @@
 import * as restify from 'restify'
-import { Router } from "../common/router"
+import { ModelRouter } from "../common/model-router"
 import {User} from './users.model'
 import {NotFoundError} from 'restify-errors'
 
-class UserRouter extends Router {
+class UserRouter extends ModelRouter<User> {
+
+  constructor() {
+    super(User)
+    this.on('beforeRender', document => {
+      // delete document.password
+      document.password = undefined
+    })
+  }
   
+  findByEmail = (req, resp, next) => {
+    if(req.query.email){
+      User.find({ email: req.query.email })
+          .then(this.renderAll(resp, next))
+          .catch(next)
+    }else{
+      next()
+    }
+  }
+
   applyRouters(application: restify.Server) {
 
-    application.get('/users', (req, resp, next) => {
-      User.find()
-        .then(this.render(resp,next))
-    })
-
-    application.get('/users/:id', (req, resp, next) => {
-      User.findById(req.params.id)
-        .then(this.render(resp,next))
-    })
-
-    application.post('/users', (req, resp, next) => {
-      const user = new User(req.body)
-      user.save()
-        .then(this.render(resp,next))
-    })
-
-    application.put('/users/:id', (req, resp, next) => {
-      const options = { overwrite: true }
-
-      User.update({_id: req.params.id}, req.body, options)
-        .exec()
-        .then(result => {
-          if(result.n) {
-            return User.findById(req.params.id)
-          } else {
-            resp.status(404)
-            resp.send({message: 'Resource not found'})
-          }
-        })
-        .then(this.render(resp,next))
-    })
-
-    application.patch('/users/:id', (req, resp, next) => {
-
-      const options = { new: true }
-
-      User.findByIdAndUpdate(req.params.id, req.body, options)
-        .then(this.render(resp,next))
-    })
-
-    application.del('/users/:id', (req, resp, next) => {
-
-      User.deleteOne({_id: req.params.id})
-      .exec()
-      .then(result => {
-        if (result) {
-          console.log(result);
-          
-          resp.send(204)
-        } else {
-          throw new NotFoundError('Documento não encontrado')
-        }
-
-        return next()
-      })
-      .catch(next)
-    })
+    // application.get({path: '/users', version: '2.0.0'}, [this.findByEmail, this.findAll])
+    // application.get({path: '/users', version: '1.0.0'}, this.findAll)
+    application.get('/users', restify.plugins.conditionalHandler([
+      { 
+        version: '1.0.0',
+        handler: this.findAll
+      },
+      {
+        version: '2.0.0',
+        handler: [this.findByEmail, this.findAll]
+      }
+    ]))
+    application.get('/users/:id', [this.validateId, this.findById])
+    application.post('/users', this.save)
+    application.put('/users/:id', [this.validateId, this.replace])
+    application.patch('/users/:id', [this.validateId, this.update])
+    application.del('/users/:id', [this.validateId, this.delete])
   
   }
 
 }
 
-export const userRouter = new UserRouter()
+export const usersRouter = new UserRouter()

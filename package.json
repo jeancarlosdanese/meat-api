@@ -14,8 +14,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "mongoose": "^5.4.8",
-    "restify": "^7.6.0"
+    "bcrypt": "^3.0.4",
+    "mongoose": "^5.4.10",
+    "restify": "^7.7.0",
+    "restify-errors": "^6.1.1"
   },
   "devDependencies": {
     "@types/mongoose": "^5.3.12",

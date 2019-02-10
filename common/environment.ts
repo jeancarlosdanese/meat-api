@@ -6,4 +6,7 @@ export const environment = {
   db: { 
     url: process.env.DB_URL || 'mongodb://localhost/meat-api'
   },
+  security: {
+    saltRound: process.env.SALT_ROUNDS || 10
+  }
 }
