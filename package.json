@@ -4,7 +4,7 @@
   "description": "API de Restaurantes",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -13,6 +13,9 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "jest": {
+    "preset": "ts-jest"
+  },
   "dependencies": {
     "bcrypt": "^3.0.4",
     "mongoose": "^5.4.10",
@@ -20,7 +23,13 @@
     "restify-errors": "^6.1.1"
   },
   "devDependencies": {
+    "@types/jest": "24.0.5",
     "@types/mongoose": "^5.3.12",
-    "@types/restify": "^7.2.7"
+    "@types/restify": "^7.2.7",
+    "@types/supertest": "2.0.7",
+    "jest": "23.6.0",
+    "supertest": "3.4.2",
+    "ts-jest": "23.10.5",
+    "typescript": "3.3.3"
   }
 }
