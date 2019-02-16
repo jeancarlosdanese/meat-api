@@ -3,7 +3,7 @@ import {environment} from '../common/environment'
 import {Router} from '../common/router'
 import * as mongoose from 'mongoose'
 import {mergePatchBodyParser} from './merge-patch.parser'
-import {handleError} from './error-handler'
+import {handleError} from './error.handler'
 
 export class Server {
 

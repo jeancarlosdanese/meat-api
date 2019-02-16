@@ -4,7 +4,7 @@ const restify = require("restify");
 const environment_1 = require("../common/environment");
 const mongoose = require("mongoose");
 const merge_patch_parser_1 = require("./merge-patch.parser");
-const error_handler_1 = require("./error-handler");
+const error_handler_1 = require("./error.handler");
 class Server {
     initializeDb() {
         mongoose.Promise = global.Promise;
