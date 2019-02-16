@@ -7,7 +7,7 @@ import * as jwt from 'jsonwebtoken';
 export const authenticate: restify.RequestHandler = (req, resp, next)=>{
   const {email, password} = req.body
   User.findByEmail(email, '+password') //1st
-    .then(user=>{
+    .then(user => {
       if(user && user.matches(password)){ //2nd
         //gerar o token
         //3rd
