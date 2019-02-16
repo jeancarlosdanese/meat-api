@@ -20,7 +20,7 @@ class ModelRouter extends router_1.Router {
             let page = parseInt(req.query._page || 1);
             page = page > 0 ? page : 1;
             const skip = (page - 1) * this.pageSize;
-            this.model.countDocuments({}).exec()
+            this.model.count({}).exec()
                 .then(count => {
                 this.model.find()
                     .skip(skip)
@@ -64,19 +64,15 @@ class ModelRouter extends router_1.Router {
                 .catch(next);
         };
         this.delete = (req, resp, next) => {
-            this.model.deleteOne({ _id: req.params.id })
-                .exec()
-                .then(result => {
-                if (result) {
-                    console.log(result);
+            this.model.remove({ _id: req.params.id }).exec().then((cmdResult) => {
+                if (cmdResult.result.n) {
                     resp.send(204);
                 }
                 else {
                     throw new restify_errors_1.NotFoundError('Documento não encontrado');
                 }
                 return next();
-            })
-                .catch(next);
+            }).catch(next);
         };
         this.basePath = `/${model.collection.name}`;
     }

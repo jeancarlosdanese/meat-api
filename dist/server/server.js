@@ -4,13 +4,25 @@ const restify = require("restify");
 const environment_1 = require("../common/environment");
 const mongoose = require("mongoose");
 const merge_patch_parser_1 = require("./merge-patch.parser");
-const handle_error_1 = require("./handle.error");
+const error_handler_1 = require("./error-handler");
 class Server {
     initializeDb() {
-        return mongoose.connect(environment_1.environment.db.url, {
+        mongoose.Promise = global.Promise;
+        const options = {
             useNewUrlParser: true,
-            useCreateIndex: true
-        });
+            useCreateIndex: true,
+            useFindAndModify: false,
+            autoIndex: false,
+            reconnectTries: Number.MAX_VALUE,
+            reconnectInterval: 500,
+            poolSize: 10,
+            // If not connected, return errors immediately rather than waiting for reconnect
+            bufferMaxEntries: 0,
+            connectTimeoutMS: 10000,
+            socketTimeoutMS: 45000,
+            family: 4 // Use IPv4, skip trying IPv6
+        };
+        return mongoose.connect(environment_1.environment.db.url, options);
     }
     initRouters(routers) {
         return new Promise((resolv, reject) => {
@@ -36,7 +48,7 @@ class Server {
                 this.application.listen(environment_1.environment.server.port, environment_1.environment.server.host, () => {
                     resolv(this.application);
                 });
-                this.application.on('restifyError', handle_error_1.handleError);
+                this.application.on('restifyError', error_handler_1.handleError);
             }
             catch (error) {
                 reject(error);
@@ -46,6 +58,9 @@ class Server {
     bootstrap(routers = []) {
         return this.initializeDb().
             then(() => this.initRouters(routers).then(() => this));
+    }
+    shutdown() {
+        return mongoose.disconnect().then(() => this.application.close());
     }
 }
 exports.Server = Server;

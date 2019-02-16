@@ -32,9 +32,9 @@ class UserRouter extends ModelRouter<User> {
 
   applyRouters(application: restify.Server) {
 
-    // application.get({path: '/users', version: '2.0.0'}, [this.findByEmail, this.findAll])
-    // application.get({path: '/users', version: '1.0.0'}, this.findAll)
-    application.get(`${this.basePath}`, restify.plugins.conditionalHandler([
+    application.get({path: '/users', version: '2.0.0'}, [this.findByEmail, this.findAll])
+    application.get({path: '/users', version: '1.0.0'}, this.findAll)
+    /* application.get(`${this.basePath}`, restify.plugins.conditionalHandler([
       { 
         version: '1.0.0',
         handler: this.findAll
@@ -43,7 +43,7 @@ class UserRouter extends ModelRouter<User> {
         version: '2.0.0',
         handler: [this.findByEmail, this.findAll]
       }
-    ]))
+    ])) */
     application.get(`${this.basePath}/:id`, [this.validateId, this.findById])
     application.post(`${this.basePath}`, this.save)
     application.put(`${this.basePath}/:id`, [this.validateId, this.replace])
