@@ -1,3 +1,4 @@
+import * as fs from 'fs'
 import * as restify from 'restify'
 import {environment} from '../common/environment'
 import {Router} from '../common/router'
@@ -5,6 +6,7 @@ import * as mongoose from 'mongoose'
 import {mergePatchBodyParser} from './merge-patch.parser'
 import {handleError} from './error.handler'
 import {tokenParser} from '../security/token.parser';
+import { fstat } from 'fs';
 
 export class Server {
 
@@ -36,7 +38,9 @@ export class Server {
       try {
         this.application = restify.createServer({
           name: 'meat-api',
-          versions: ['1.0.0', '2.0.0']
+          versions: ['1.0.0', '2.0.0'],
+          certificate: fs.readFileSync('./security/keys/cert.pem'),
+          key: fs.readFileSync('./security/keys/key.pem')
         })
         
         /* this.application.use(restify.plugins.conditionalHandler({
