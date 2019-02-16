@@ -3,11 +3,7 @@ import * as restify from 'restify'
 
 class MainRouter extends Router {
   
-  applyRouters(apllication: restify.Server) {
-    throw new Error("Method not implemented.");
-  }
-  
-  applyRoutes(application: restify.Server) {
+  applyRouters(application: restify.Server) {
     application.get('/', (req, resp, next)=>{
       resp.json({
         users: '/users',

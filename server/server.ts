@@ -9,7 +9,7 @@ export class Server {
 
   application: restify.Server
 
-  initializeDb(): mongoose.MongooseThenable {
+  initializeDb() {
     (<any>mongoose).Promise = global.Promise
 
     const options = {

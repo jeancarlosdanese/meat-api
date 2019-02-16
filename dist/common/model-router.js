@@ -20,7 +20,7 @@ class ModelRouter extends router_1.Router {
             let page = parseInt(req.query._page || 1);
             page = page > 0 ? page : 1;
             const skip = (page - 1) * this.pageSize;
-            this.model.count({}).exec()
+            this.model.countDocuments({}).exec()
                 .then(count => {
                 this.model.find()
                     .skip(skip)

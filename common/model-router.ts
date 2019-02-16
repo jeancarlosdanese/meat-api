@@ -59,7 +59,7 @@ export abstract class ModelRouter<T extends mongoose.Document> extends Router {
 
     const skip = (page - 1) * this.pageSize
 
-    this.model.count({}).exec()
+    this.model.countDocuments({}).exec()
       .then(count => {
         this.model.find()
           .skip(skip)
