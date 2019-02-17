@@ -16,7 +16,8 @@
   "jest": {
     "verbose": true,
     "globals": {
-      "address": "http://localhost:3001"
+      "address": "http://localhost:3001",
+      "auth": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbkBlbWFpbC5jb20iLCJpYXQiOjE1NTAzNjE0MTB9.ID9PwPV_T56OLD1NydDXqyJSiVsJ68-CBsw7Mmzywv4"
     },
     "testEnvironment": "node",
     "transform": {
@@ -40,9 +41,9 @@
     "restify-errors": "^6.1.1"
   },
   "devDependencies": {
-    "@types/jsonwebtoken": "^8.3.0",
     "@types/bcrypt": "^3.0.0",
     "@types/jest": "^22.2.3",
+    "@types/jsonwebtoken": "^8.3.0",
     "@types/mongoose": "^5.3.17",
     "@types/restify": "^7.2.8",
     "@types/restify-errors": "^4.3.3",
@@ -51,7 +52,7 @@
     "jest-cli": "^24.1.0",
     "supertest": "^3.4.2",
     "ts-jest": "^23.10.5",
-    "ts-node": "^8.0.2",
+    "ts-node": "^6.2.0",
     "typescript": "^2.9.2"
   }
 }
