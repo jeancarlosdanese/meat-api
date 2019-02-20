@@ -7,6 +7,7 @@ const mongoose = require("mongoose");
 const merge_patch_parser_1 = require("./merge-patch.parser");
 const error_handler_1 = require("./error.handler");
 const token_parser_1 = require("../security/token.parser");
+const logger_1 = require("../common/logger");
 class Server {
     initializeDb() {
         mongoose.Promise = global.Promise;
@@ -32,19 +33,16 @@ class Server {
                 const options = {
                     name: 'meat-api',
                     versions: ['1.0.0', '2.0.0'],
+                    log: logger_1.logger
                 };
                 if (environment_1.environment.security.enableHttps) {
                     options.certificate = fs.readFileSync(environment_1.environment.security.certificate);
                     options.key = fs.readFileSync(environment_1.environment.security.key);
                 }
                 this.application = restify.createServer(options);
-                /* this.application.use(restify.plugins.conditionalHandler({
-                  contentType: 'application/json',
-                  version: '1.0.0',
-                  handler: (req, resp, next) => {
-                    next()
-                  }
-                })) */
+                this.application.pre(restify.plugins.requestLogger({
+                    log: logger_1.logger
+                }));
                 this.application.use(restify.plugins.queryParser());
                 this.application.use(restify.plugins.bodyParser());
                 this.application.use(merge_patch_parser_1.mergePatchBodyParser);
@@ -57,6 +55,16 @@ class Server {
                     resolv(this.application);
                 });
                 this.application.on('restifyError', error_handler_1.handleError);
+                // (req, resp, route, error)
+                /* this.application.on('after', restify.plugins.auditLogger({
+                  log: logger,
+                  event: 'after',
+                  server: this.application
+                }))
+        
+                this.application.on('audit', data => {
+        
+                }) */
             }
             catch (error) {
                 reject(error);
@@ -64,8 +72,7 @@ class Server {
         });
     }
     bootstrap(routers = []) {
-        return this.initializeDb().
-            then(() => this.initRouters(routers).then(() => this));
+        return this.initializeDb().then(() => this.initRouters(routers).then(() => this));
     }
     shutdown() {
         return mongoose.disconnect().then(() => this.application.close());

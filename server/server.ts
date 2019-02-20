@@ -5,8 +5,9 @@ import {Router} from '../common/router'
 import * as mongoose from 'mongoose'
 import {mergePatchBodyParser} from './merge-patch.parser'
 import {handleError} from './error.handler'
-import {tokenParser} from '../security/token.parser';
-import { fstat } from 'fs';
+import {tokenParser} from '../security/token.parser'
+import {logger} from '../common/logger'
+
 
 export class Server {
 
@@ -40,6 +41,7 @@ export class Server {
         const options: restify.ServerOptions = {
           name: 'meat-api',
           versions: ['1.0.0', '2.0.0'],
+          log: logger
         }
 
         if (environment.security.enableHttps) {
@@ -49,13 +51,9 @@ export class Server {
 
         this.application = restify.createServer(options)
         
-        /* this.application.use(restify.plugins.conditionalHandler({
-          contentType: 'application/json',
-          version: '1.0.0',
-          handler: (req, resp, next) => {
-            next()
-          }
-        })) */
+        this.application.pre(restify.plugins.requestLogger({
+          log: logger
+        }))
 
         this.application.use(restify.plugins.queryParser())
         this.application.use(restify.plugins.bodyParser())
@@ -72,6 +70,16 @@ export class Server {
         })
 
         this.application.on('restifyError', handleError)
+        // (req, resp, route, error)
+        /* this.application.on('after', restify.plugins.auditLogger({
+          log: logger,
+          event: 'after',
+          server: this.application
+        }))
+
+        this.application.on('audit', data => {
+
+        }) */
 
       } catch (error) {
         reject(error)
@@ -80,9 +88,8 @@ export class Server {
   }
 
   bootstrap(routers: Router[] = []): Promise<Server> {
-    return this.initializeDb().
-      then(() => 
-        this.initRouters(routers).then(() => this))
+    return this.initializeDb().then(() => 
+           this.initRouters(routers).then(() => this))
   }
 
   shutdown(){
